@@ -10,10 +10,10 @@ const ConferenceEvent = () => {
     const [numberOfPeople, setNumberOfPeople] = useState(1);
     const venueItems = useSelector((state) => state.venue);
     const avItems = useSelector((state) => state.av);
+	const mealsItems = useSelector((state) => state.meals);
     const dispatch = useDispatch();
     const remainingAuditoriumQuantity = 3 - venueItems.find(item => item.name === "Auditorium Hall (Capacity:200)").quantity;
     
-
     
     const handleToggleItems = () => {
         console.log("handleToggleItems called");
@@ -39,6 +39,18 @@ const ConferenceEvent = () => {
     const handleDecrementAvQuantity = (index) => {
         dispatch(decrementAvQuantity(index));
     };
+	
+	const handleMealSelection = (index) => {
+        const item = mealsItems[index];
+        if (item.selected && item.type === "mealForPeople") {
+            // Ensure numberOfPeople is set before toggling selection
+            const newNumberOfPeople = item.selected ? numberOfPeople : 0;
+            dispatch(toggleMealSelection(index, newNumberOfPeople));
+        }
+        else {
+            dispatch(toggleMealSelection(index));
+        }
+};
 
 
     const getItemsFromTotalCost = () => {
@@ -141,8 +153,7 @@ const ConferenceEvent = () => {
             setShowItems(!showItems); // Toggle showItems to true only if it's currently false
           }
         }
-      };
-
+      }
       const totalCosts = {
         venue: venueTotalCost,
         av: avTotalCost,
@@ -150,19 +161,9 @@ const ConferenceEvent = () => {
     };
 
 
-    const mealsItems = useSelector((state) => state.meals);
+    
 
-    const handleMealSelection = (index) => {
-        const item = mealsItems[index];
-        if (item.selected && item.type === "mealForPeople") {
-            // Ensure numberOfPeople is set before toggling selection
-            const newNumberOfPeople = item.selected ? numberOfPeople : 0;
-            dispatch(toggleMealSelection(index, newNumberOfPeople));
-        }
-        else {
-            dispatch(toggleMealSelection(index));
-        }
-};
+    
 
     
 
@@ -263,6 +264,23 @@ const ConferenceEvent = () => {
                                 <div className="total_cost">Total Cost: {avTotalCost}</div>
 
                             </div>
+							<div className="addons_selection">
+                {avItems.map((item, index) => (
+                    <div className="av_data venue_main" key={index}>
+                        <div className="img">
+                            <img src={item.img} alt={item.name} />
+                        </div>
+                    <div className="text"> {item.name} </div>
+                    <div> ${item.cost} </div>
+                        <div className="addons_btn">
+                            <button className="btn-warning" onClick={() => handleDecrementAvQuantity(index)}> &ndash; </button>
+                            <span className="quantity-value">{item.quantity}</span>
+                            <button className=" btn-success" onClick={() => handleIncrementAvQuantity(index)}> &#43; </button>
+                        </div>
+                    </div>
+                ))}
+
+            </div>
 
                             {/* Meal Section */}
 
@@ -318,23 +336,7 @@ const ConferenceEvent = () => {
 
 
             </div>
-            <div className="addons_selection">
-                {avItems.map((item, index) => (
-                    <div className="av_data venue_main" key={index}>
-                        <div className="img">
-                            <img src={item.img} alt={item.name} />
-                        </div>
-                    <div className="text"> {item.name} </div>
-                    <div> ${item.cost} </div>
-                        <div className="addons_btn">
-                            <button className="btn-warning" onClick={() => handleDecrementAvQuantity(index)}> &ndash; </button>
-                            <span className="quantity-value">{item.quantity}</span>
-                            <button className=" btn-success" onClick={() => handleIncrementAvQuantity(index)}> &#43; </button>
-                        </div>
-                    </div>
-                ))}
-
-            </div>
+            
         </>
 
     );
